@@ -19,6 +19,16 @@ const DEFAULT_COLORS = [
 ];
 
 export const PieChart = ({ data, height = 300, colors = DEFAULT_COLORS }: PieChartProps) => {
+  // Debug: Log the data to see what we're receiving
+  console.log('PieChart data:', data);
+  
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full text-muted-foreground">
+        <p>No data to display</p>
+      </div>
+    );
+  }
   return (
     <ResponsiveContainer width="100%" height={height}>
       <RechartsPieChart>
@@ -28,7 +38,7 @@ export const PieChart = ({ data, height = 300, colors = DEFAULT_COLORS }: PieCha
           cy="50%"
           labelLine={false}
           label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-          outerRadius={80}
+          outerRadius={Math.min(80, height / 4)}
           fill="#8884d8"
           dataKey="value"
         >

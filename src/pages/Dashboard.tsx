@@ -226,7 +226,16 @@ export const Dashboard = () => {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <PieChart data={currencyDistribution} height={250} />
+                  {currencyDistribution.length > 0 ? (
+                    <PieChart data={currencyDistribution} height={250} />
+                  ) : (
+                    <div className="flex items-center justify-center h-[250px] text-muted-foreground">
+                      <div className="text-center">
+                        <p>No currency data available</p>
+                        <p className="text-sm">Total records: {invoiceData.length}</p>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
