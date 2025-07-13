@@ -30,6 +30,10 @@ export const generateSampleData = (): InvoiceData[] => {
 
   const currencies = ['USD', 'EUR', 'GBP', 'JPY', 'CAD'];
   const icaCodes = ['VISA', 'MAST', 'AMEX', 'DISC', 'DINE'];
+  const regions = ['North America', 'Europe', 'Asia Pacific', 'Latin America', 'Middle East & Africa'];
+  const countries = ['USA', 'UK', 'Germany', 'Japan', 'Canada', 'Australia', 'France', 'Singapore', 'Brazil', 'UAE'];
+  const uomTypes = ['TRANSACTION', 'VOLUME', 'AMOUNT', 'COUNT', 'PERCENTAGE'];
+  const fileNames = ['batch_001.csv', 'daily_summary.xlsx', 'monthly_report.json', 'annual_data.xml', 'quarterly_fees.csv'];
 
   const data: InvoiceData[] = [];
 
@@ -57,7 +61,15 @@ export const generateSampleData = (): InvoiceData[] => {
       taxCharge,
       totalCharge,
       invoiceICA: icaCodes[Math.floor(Math.random() * icaCodes.length)],
-      collectionMethod: Math.random() > 0.3 ? 'AUTO' : 'MANUAL'
+      collectionMethod: Math.random() > 0.3 ? 'AUTO' : 'MANUAL',
+      inputFileName: fileNames[Math.floor(Math.random() * fileNames.length)],
+      invNo: `INV-${billDate.getFullYear()}-${(i + 1).toString().padStart(6, '0')}`,
+      uom: uomTypes[Math.floor(Math.random() * uomTypes.length)],
+      region: regions[Math.floor(Math.random() * regions.length)],
+      country: countries[Math.floor(Math.random() * countries.length)],
+      isReversal: Math.random() < 0.05, // 5% chance of reversal
+      processingTime: Math.floor(Math.random() * 24) + 1, // 1-24 hours
+      agentId: `AGENT-${Math.floor(Math.random() * 50) + 1}`
     });
   }
 

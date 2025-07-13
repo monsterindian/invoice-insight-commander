@@ -12,6 +12,14 @@ export interface InvoiceData {
   totalCharge: number;
   invoiceICA: string;
   collectionMethod: 'AUTO' | 'MANUAL';
+  inputFileName: string;
+  invNo: string;
+  uom: string;
+  region?: string;
+  country?: string;
+  isReversal?: boolean;
+  processingTime?: number;
+  agentId?: string;
 }
 
 export interface KPIData {
@@ -27,6 +35,8 @@ export interface ChartDataPoint {
   date?: string;
   category?: string;
   growth?: number;
+  region?: string;
+  country?: string;
 }
 
 export interface ServiceAnalytics {
@@ -43,4 +53,46 @@ export interface SchemeAnalytics {
   transactionCount: number;
   growthRate: number;
   marketShare: number;
+}
+
+export interface GeoAnalytics {
+  region: string;
+  country: string;
+  totalFees: number;
+  transactionCount: number;
+  riskScore: number;
+  negativeRateFrequency: number;
+}
+
+export interface CurrencyVolatility {
+  currency: string;
+  totalFees: number;
+  volatilityScore: number;
+  monthlyVariance: number;
+  recommendedAction: string;
+}
+
+export interface VolumeAnalytics {
+  month: string;
+  fileCount: number;
+  invoiceCount: number;
+  isAnomaly: boolean;
+  anomalyScore: number;
+}
+
+export interface LifecycleStage {
+  stage: string;
+  count: number;
+  percentage: number;
+  dropOffRate: number;
+}
+
+export interface AlertRule {
+  id: string;
+  title: string;
+  condition: string;
+  threshold: number;
+  isTriggered: boolean;
+  severity: 'low' | 'medium' | 'high';
+  value?: number;
 }

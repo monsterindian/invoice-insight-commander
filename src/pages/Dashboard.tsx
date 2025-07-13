@@ -5,6 +5,11 @@ import { KPICard } from '@/components/KPICard';
 import { TimeSeriesChart } from '@/components/charts/TimeSeriesChart';
 import { BarChart } from '@/components/charts/BarChart';
 import { PieChart } from '@/components/charts/PieChart';
+import { GeoHeatmap } from '@/components/charts/GeoHeatmap';
+import { VolumeAnomalyChart } from '@/components/charts/VolumeAnomalyChart';
+import { CurrencyVolatilityChart } from '@/components/charts/CurrencyVolatilityChart';
+import { LifecycleFunnel } from '@/components/charts/LifecycleFunnel';
+import { AlertDashboard } from '@/components/charts/AlertDashboard';
 import { sampleInvoiceData } from '@/data/sampleInvoiceData';
 import { 
   calculateKPIs, 
@@ -13,7 +18,16 @@ import {
   getTopEventDescriptions,
   getCurrencyDistribution,
   getSchemeAnalytics,
-  getNegativeRateAnalysis
+  getNegativeRateAnalysis,
+  getGeoAnalytics,
+  getVolumeAnalytics,
+  getCurrencyVolatility,
+  getCollectionMethodAnalysis,
+  getUOMAnalysis,
+  getLifecycleAnalysis,
+  getAgentRecommendations,
+  getDynamicBenchmarks,
+  generateAlertRules
 } from '@/utils/dataAnalytics';
 import { 
   DollarSign, 
@@ -22,7 +36,13 @@ import {
   AlertTriangle,
   BarChart3,
   PieChart as PieChartIcon,
-  Activity
+  Activity,
+  Globe,
+  Zap,
+  Shield,
+  Target,
+  Brain,
+  Bell
 } from 'lucide-react';
 
 export const Dashboard = () => {
@@ -33,6 +53,17 @@ export const Dashboard = () => {
   const currencyDistribution = useMemo(() => getCurrencyDistribution(sampleInvoiceData), []);
   const schemeAnalytics = useMemo(() => getSchemeAnalytics(sampleInvoiceData), []);
   const negativeRateAnalysis = useMemo(() => getNegativeRateAnalysis(sampleInvoiceData), []);
+  
+  // New analytics
+  const geoAnalytics = useMemo(() => getGeoAnalytics(sampleInvoiceData), []);
+  const volumeAnalytics = useMemo(() => getVolumeAnalytics(sampleInvoiceData), []);
+  const currencyVolatility = useMemo(() => getCurrencyVolatility(sampleInvoiceData), []);
+  const collectionMethodAnalysis = useMemo(() => getCollectionMethodAnalysis(sampleInvoiceData), []);
+  const uomAnalysis = useMemo(() => getUOMAnalysis(sampleInvoiceData), []);
+  const lifecycleAnalysis = useMemo(() => getLifecycleAnalysis(sampleInvoiceData), []);
+  const agentRecommendations = useMemo(() => getAgentRecommendations(sampleInvoiceData), []);
+  const dynamicBenchmarks = useMemo(() => getDynamicBenchmarks(sampleInvoiceData), []);
+  const alertRules = useMemo(() => generateAlertRules(sampleInvoiceData), []);
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -75,12 +106,15 @@ export const Dashboard = () => {
 
         {/* Main Dashboard Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="trends">Trends</TabsTrigger>
-            <TabsTrigger value="services">Services</TabsTrigger>
-            <TabsTrigger value="schemes">Schemes</TabsTrigger>
-            <TabsTrigger value="insights">Insights</TabsTrigger>
+            <TabsTrigger value="geo">Geography</TabsTrigger>
+            <TabsTrigger value="volume">Volume</TabsTrigger>
+            <TabsTrigger value="currency">Currency</TabsTrigger>
+            <TabsTrigger value="lifecycle">Lifecycle</TabsTrigger>
+            <TabsTrigger value="agent">AI Insights</TabsTrigger>
+            <TabsTrigger value="alerts">Alerts</TabsTrigger>
+            <TabsTrigger value="advanced">Advanced</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -152,19 +186,275 @@ export const Dashboard = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="trends" className="space-y-6">
+          {/* Geography Tab */}
+          <TabsContent value="geo" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <KPICard
+                title="Top Region"
+                value={geoAnalytics.sort((a, b) => b.totalFees - a.totalFees)[0]?.region || 'N/A'}
+                subtitle={`$${geoAnalytics.sort((a, b) => b.totalFees - a.totalFees)[0]?.totalFees.toLocaleString() || 0}`}
+                icon={<Globe className="h-5 w-5" />}
+              />
+              <KPICard
+                title="Highest Risk Region"
+                value={geoAnalytics.sort((a, b) => b.riskScore - a.riskScore)[0]?.region || 'N/A'}
+                subtitle={`${((geoAnalytics.sort((a, b) => b.riskScore - a.riskScore)[0]?.riskScore || 0) * 100).toFixed(1)}% risk score`}
+                variant="warning"
+                icon={<AlertTriangle className="h-5 w-5" />}
+              />
+              <KPICard
+                title="Countries"
+                value={new Set(geoAnalytics.map(g => g.country)).size}
+                subtitle="Active regions"
+                icon={<Activity className="h-5 w-5" />}
+              />
+            </div>
+
             <Card className="bg-gradient-card shadow-card">
               <CardHeader>
-                <CardTitle>Historical Pattern Analysis</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="h-5 w-5 text-primary" />
+                  Regional Fee Heatmap & Risk Analysis
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <TimeSeriesChart 
-                  data={monthlyTrends.map(item => ({ month: item.name, totalCharge: item.value }))} 
+                <GeoHeatmap 
+                  data={geoAnalytics.map(item => ({
+                    region: item.region,
+                    country: item.country,
+                    value: item.totalFees,
+                    riskScore: item.riskScore
+                  }))} 
+                  height={400} 
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Volume Tab */}
+          <TabsContent value="volume" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <KPICard
+                title="Avg Files/Month"
+                value={Math.round(volumeAnalytics.reduce((sum, v) => sum + v.fileCount, 0) / volumeAnalytics.length)}
+                icon={<FileText className="h-5 w-5" />}
+              />
+              <KPICard
+                title="Avg Invoices/Month"
+                value={Math.round(volumeAnalytics.reduce((sum, v) => sum + v.invoiceCount, 0) / volumeAnalytics.length)}
+                icon={<Activity className="h-5 w-5" />}
+              />
+              <KPICard
+                title="Volume Anomalies"
+                value={volumeAnalytics.filter(v => v.isAnomaly).length}
+                variant="warning"
+                icon={<AlertTriangle className="h-5 w-5" />}
+              />
+              <KPICard
+                title="Peak Month"
+                value={volumeAnalytics.sort((a, b) => b.invoiceCount - a.invoiceCount)[0]?.month || 'N/A'}
+                subtitle={`${volumeAnalytics.sort((a, b) => b.invoiceCount - a.invoiceCount)[0]?.invoiceCount || 0} invoices`}
+                icon={<TrendingUp className="h-5 w-5" />}
+              />
+            </div>
+
+            <Card className="bg-gradient-card shadow-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5 text-primary" />
+                  Invoice Volume Analysis & Anomaly Detection
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <VolumeAnomalyChart data={volumeAnalytics} height={400} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Currency Tab */}
+          <TabsContent value="currency" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              {currencyVolatility.slice(0, 4).map((currency) => (
+                <KPICard
+                  key={currency.currency}
+                  title={currency.currency}
+                  value={`$${currency.totalFees.toLocaleString()}`}
+                  subtitle={currency.recommendedAction}
+                  variant={currency.volatilityScore > 0.5 ? 'warning' : 'default'}
+                />
+              ))}
+            </div>
+
+            <Card className="bg-gradient-card shadow-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                  Currency Volatility Analysis
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CurrencyVolatilityChart 
+                  data={monthlyTrends.map(item => {
+                    const monthData: any = { month: item.name };
+                    currencyDistribution.forEach(curr => {
+                      monthData[curr.name] = Math.random() * 50000; // Mock monthly data
+                    });
+                    return monthData;
+                  })}
+                  currencies={currencyDistribution.map(c => c.name)}
                   height={400}
                 />
               </CardContent>
             </Card>
 
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="bg-gradient-card shadow-card">
+                <CardHeader>
+                  <CardTitle>Collection Method Performance</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <BarChart 
+                    data={collectionMethodAnalysis.map(item => ({ 
+                      name: item.method, 
+                      value: item.averageFee 
+                    }))} 
+                    height={300}
+                    color="hsl(var(--chart-4))"
+                  />
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-card shadow-card">
+                <CardHeader>
+                  <CardTitle>UOM Impact Analysis</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <BarChart 
+                    data={uomAnalysis.map(item => ({ 
+                      name: item.uom, 
+                      value: item.averageChargePerUnit 
+                    }))} 
+                    height={300}
+                    color="hsl(var(--chart-5))"
+                  />
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Lifecycle Tab */}
+          <TabsContent value="lifecycle" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <KPICard
+                title="Conversion Rate"
+                value={`${((lifecycleAnalysis.find(s => s.stage === 'Final Paid Fees')?.percentage || 0)).toFixed(1)}%`}
+                subtitle="Total to final paid"
+                variant="success"
+                icon={<Target className="h-5 w-5" />}
+              />
+              <KPICard
+                title="Reversal Rate"
+                value={`${((lifecycleAnalysis.find(s => s.stage === 'Reversed Transactions')?.percentage || 0)).toFixed(1)}%`}
+                subtitle="Of charged transactions"
+                variant="destructive"
+                icon={<AlertTriangle className="h-5 w-5" />}
+              />
+            </div>
+
+            <Card className="bg-gradient-card shadow-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="h-5 w-5 text-primary" />
+                  Fee Lifecycle Funnel Analysis
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <LifecycleFunnel data={lifecycleAnalysis} height={400} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* AI Insights Tab */}
+          <TabsContent value="agent" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {agentRecommendations.map((rec, index) => (
+                <KPICard
+                  key={rec.category}
+                  title={rec.category}
+                  value={`$${rec.potentialSavings.toLocaleString()}`}
+                  subtitle="Potential savings"
+                  variant={rec.priority === 'High' ? 'success' : 'default'}
+                  icon={<Brain className="h-5 w-5" />}
+                />
+              ))}
+            </div>
+
+            <Card className="bg-gradient-card shadow-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Brain className="h-5 w-5 text-primary" />
+                  AI-Powered Recommendations
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {agentRecommendations.map((rec, index) => (
+                  <div
+                    key={rec.category}
+                    className="p-4 bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-lg"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-semibold text-primary">{rec.category}</h4>
+                      <span className={`text-xs px-2 py-1 rounded ${
+                        rec.priority === 'High' ? 'bg-destructive text-destructive-foreground' :
+                        rec.priority === 'Medium' ? 'bg-warning text-warning-foreground' :
+                        'bg-secondary text-secondary-foreground'
+                      }`}>
+                        {rec.priority} Priority
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-2">{rec.recommendation}</p>
+                    <p className="text-sm font-semibold text-success">
+                      Potential Savings: ${rec.potentialSavings.toLocaleString()}
+                    </p>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-card shadow-card">
+              <CardHeader>
+                <CardTitle>Dynamic Benchmarks</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="p-4 border rounded-lg">
+                    <h4 className="text-sm font-medium text-muted-foreground">75th Percentile</h4>
+                    <p className="text-2xl font-bold">${dynamicBenchmarks.percentile75.toLocaleString()}</p>
+                  </div>
+                  <div className="p-4 border rounded-lg">
+                    <h4 className="text-sm font-medium text-muted-foreground">90th Percentile</h4>
+                    <p className="text-2xl font-bold">${dynamicBenchmarks.percentile90.toLocaleString()}</p>
+                  </div>
+                  <div className="p-4 border rounded-lg">
+                    <h4 className="text-sm font-medium text-muted-foreground">95th Percentile</h4>
+                    <p className="text-2xl font-bold">${dynamicBenchmarks.percentile95.toLocaleString()}</p>
+                  </div>
+                  <div className="p-4 border rounded-lg">
+                    <h4 className="text-sm font-medium text-muted-foreground">YoY Growth</h4>
+                    <p className="text-2xl font-bold text-success">{dynamicBenchmarks.yearOverYearGrowth.toFixed(1)}%</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Alerts Tab */}
+          <TabsContent value="alerts" className="space-y-6">
+            <AlertDashboard alerts={alertRules} />
+          </TabsContent>
+
+          {/* Advanced Tab */}
+          <TabsContent value="advanced" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card className="bg-gradient-card shadow-card">
                 <CardHeader>
@@ -190,93 +480,6 @@ export const Dashboard = () => {
                 </CardContent>
               </Card>
             </div>
-          </TabsContent>
-
-          <TabsContent value="services" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {topServiceCodes.slice(0, 3).map((service, index) => (
-                <KPICard
-                  key={service.name}
-                  title={service.name}
-                  value={`$${service.value.toLocaleString()}`}
-                  variant={index === 0 ? 'success' : 'default'}
-                />
-              ))}
-            </div>
-
-            <Card className="bg-gradient-card shadow-card">
-              <CardHeader>
-                <CardTitle>All Service Codes Performance</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <BarChart data={topServiceCodes} height={400} />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="schemes" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {schemeAnalytics.slice(0, 4).map((scheme) => (
-                <KPICard
-                  key={scheme.schemeId}
-                  title={scheme.schemeId}
-                  value={`$${scheme.totalFees.toLocaleString()}`}
-                  subtitle={`${scheme.marketShare.toFixed(1)}% market share`}
-                  trend={scheme.growthRate}
-                />
-              ))}
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="bg-gradient-card shadow-card">
-                <CardHeader>
-                  <CardTitle>Scheme Performance</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <BarChart 
-                    data={schemeAnalytics.map(item => ({ 
-                      name: item.schemeId, 
-                      value: item.totalFees 
-                    }))} 
-                    height={300}
-                  />
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-card shadow-card">
-                <CardHeader>
-                  <CardTitle>Market Share</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <PieChart 
-                    data={schemeAnalytics.map(item => ({ 
-                      name: item.schemeId, 
-                      value: item.marketShare 
-                    }))} 
-                    height={300}
-                  />
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="insights" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <KPICard
-                title="Negative Rate Charges"
-                value={`$${negativeRateAnalysis.totalNegativeCharges.toLocaleString()}`}
-                subtitle="Total penalty fees"
-                variant="destructive"
-                icon={<AlertTriangle className="h-5 w-5" />}
-              />
-              <KPICard
-                title="Fee Impact"
-                value={`${negativeRateAnalysis.percentageOfNegativeRates.toFixed(1)}%`}
-                subtitle="Of total charges"
-                variant="warning"
-                icon={<TrendingUp className="h-5 w-5" />}
-              />
-            </div>
 
             <Card className="bg-gradient-card shadow-card">
               <CardHeader>
@@ -293,7 +496,7 @@ export const Dashboard = () => {
 
             <Card className="bg-gradient-card shadow-card">
               <CardHeader>
-                <CardTitle>Recommendations</CardTitle>
+                <CardTitle>Strategic Recommendations</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -307,6 +510,18 @@ export const Dashboard = () => {
                     <h4 className="font-semibold text-warning mb-2">Reduce Penalty Fees</h4>
                     <p className="text-sm text-muted-foreground">
                       Target services with consistently negative rates for process optimization.
+                    </p>
+                  </div>
+                  <div className="p-4 bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-lg">
+                    <h4 className="font-semibold text-primary mb-2">Currency Hedging</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Consider hedging strategies for high-volatility currencies to minimize exposure.
+                    </p>
+                  </div>
+                  <div className="p-4 bg-gradient-to-r from-accent/10 to-accent/5 border border-accent/20 rounded-lg">
+                    <h4 className="font-semibold text-accent mb-2">Volume Optimization</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Implement proactive monitoring for volume anomalies to prevent processing delays.
                     </p>
                   </div>
                 </div>
