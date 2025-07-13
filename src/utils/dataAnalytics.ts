@@ -72,21 +72,21 @@ export const getTopEventDescriptions = (data: InvoiceData[], limit: number = 10)
 
 export const getCurrencyDistribution = (data: InvoiceData[]): ChartDataPoint[] => {
   console.log('getCurrencyDistribution - Input data length:', data.length);
-  console.log('getCurrencyDistribution - Sample data:', data.slice(0, 3));
   
   const currencyData = data.reduce((acc, item) => {
-    console.log('Processing item currency:', item.currency, 'totalCharge:', item.totalCharge);
     if (!acc[item.currency]) {
       acc[item.currency] = 0;
     }
-    acc[item.currency] += item.totalCharge;
+    // Use absolute value to handle negative charges (reversals)
+    acc[item.currency] += Math.abs(item.totalCharge);
     return acc;
   }, {} as Record<string, number>);
 
-  console.log('getCurrencyDistribution - Currency data:', currencyData);
+  console.log('getCurrencyDistribution - Currency data aggregated:', currencyData);
   
   const result = Object.entries(currencyData)
-    .map(([name, value]) => ({ name, value }));
+    .map(([name, value]) => ({ name, value }))
+    .filter(item => item.value > 0); // Filter out zero values
     
   console.log('getCurrencyDistribution - Final result:', result);
   return result;
