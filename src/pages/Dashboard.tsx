@@ -10,6 +10,7 @@ import { VolumeAnomalyChart } from '@/components/charts/VolumeAnomalyChart';
 import { CurrencyVolatilityChart } from '@/components/charts/CurrencyVolatilityChart';
 import { LifecycleFunnel } from '@/components/charts/LifecycleFunnel';
 import { AlertDashboard } from '@/components/charts/AlertDashboard';
+import { AgenticAIRecommendations } from '@/components/AgenticAIRecommendations';
 import { sampleInvoiceData } from '@/data/sampleInvoiceData';
 import { 
   calculateKPIs, 
@@ -184,6 +185,34 @@ export const Dashboard = () => {
                 </CardContent>
               </Card>
             </div>
+
+            {/* AI Recommendations for Fee Overview */}
+            <AgenticAIRecommendations 
+              title="Fee Overview Dashboard"
+              recommendations={[
+                {
+                  title: "High-Impact Service Codes Identified",
+                  description: `${topServiceCodes.filter(s => (s.value / kpis.totalFeesPaid) > 0.1).length} service codes contribute >10% of monthly total charges. Recommend immediate renegotiation for: ${topServiceCodes.slice(0, 3).map(s => s.name).join(', ')}.`,
+                  priority: 'high',
+                  category: 'optimization',
+                  potentialImpact: `Estimated savings: $${(topServiceCodes.slice(0, 3).reduce((sum, s) => sum + s.value, 0) * 0.15).toLocaleString()}`
+                },
+                {
+                  title: "Volume Surge Investigation Required",
+                  description: `Detected unusual QtyAmt spikes in ${volumeAnalytics.filter(v => v.isAnomaly).length} months. Root cause analysis recommended for volume anomalies exceeding 30% variance.`,
+                  priority: 'medium',
+                  category: 'investigation',
+                  potentialImpact: 'Prevent future cost overruns'
+                },
+                {
+                  title: "Alternative Transaction Routing",
+                  description: `Consider routing ${topServiceCodes[0]?.name} transactions through lower-cost channels. Current exposure: $${topServiceCodes[0]?.value.toLocaleString()}.`,
+                  priority: 'high',
+                  category: 'action',
+                  potentialImpact: `Potential reduction: $${(topServiceCodes[0]?.value * 0.2).toLocaleString()}`
+                }
+              ]}
+            />
           </TabsContent>
 
           {/* Geography Tab */}
