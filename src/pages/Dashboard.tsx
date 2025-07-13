@@ -31,7 +31,8 @@ import {
   getLifecycleAnalysis,
   getAgentRecommendations,
   getDynamicBenchmarks,
-  generateAlertRules
+  generateAlertRules,
+  getKPICalculationDetails
 } from '@/utils/dataAnalytics';
 import { 
   DollarSign, 
@@ -73,6 +74,7 @@ export const Dashboard = () => {
   }, []);
 
   const kpis = useMemo(() => calculateKPIs(invoiceData), [invoiceData]);
+  const kpiDetails = useMemo(() => getKPICalculationDetails(invoiceData), [invoiceData]);
   const monthlyTrends = useMemo(() => getMonthlyTrends(invoiceData), [invoiceData]);
   const topServiceCodes = useMemo(() => getTopServiceCodes(invoiceData), [invoiceData]);
   const topEventDescriptions = useMemo(() => getTopEventDescriptions(invoiceData), [invoiceData]);
@@ -146,18 +148,21 @@ export const Dashboard = () => {
             trend={kpis.monthlyGrowth}
             variant="success"
             icon={<DollarSign className="h-5 w-5" />}
+            calculation={kpiDetails.totalFeesPaid}
           />
           <KPICard
             title="Average Rate"
             value={`$${kpis.averageRate.toFixed(2)}`}
             subtitle="Per transaction"
             icon={<TrendingUp className="h-5 w-5" />}
+            calculation={kpiDetails.averageRate}
           />
           <KPICard
             title="Number of Invoices"
             value={kpis.numberOfInvoices.toLocaleString()}
             subtitle="Total processed"
             icon={<FileText className="h-5 w-5" />}
+            calculation={kpiDetails.numberOfInvoices}
           />
           <KPICard
             title="Negative Rate Impact"
@@ -165,6 +170,7 @@ export const Dashboard = () => {
             subtitle="Of total charges"
             variant="warning"
             icon={<AlertTriangle className="h-5 w-5" />}
+            calculation={kpiDetails.negativeRateImpact}
           />
         </div>
 

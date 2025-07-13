@@ -25,6 +25,124 @@ export const calculateKPIs = (data: InvoiceData[]): KPIData => {
   };
 };
 
+// Enhanced calculation details for KPIs
+export const getKPICalculationDetails = (data: InvoiceData[]) => {
+  const totalFeesPaid = data.reduce((sum, item) => sum + item.totalCharge, 0);
+  const totalRateSum = data.reduce((sum, item) => sum + item.rate, 0);
+  const averageRate = totalRateSum / data.length;
+  const numberOfInvoices = data.length;
+  
+  // Negative rate impact calculation
+  const negativeRateTransactions = data.filter(item => item.rate < 0);
+  const negativeRateImpact = negativeRateTransactions.length / data.length * 100;
+  const negativeRateTotal = negativeRateTransactions.reduce((sum, item) => sum + Math.abs(item.totalCharge), 0);
+
+  // Monthly growth calculation
+  const currentMonth = new Date().getMonth();
+  const currentMonthData = data.filter(item => new Date(item.billDate).getMonth() === currentMonth);
+  const previousMonthData = data.filter(item => new Date(item.billDate).getMonth() === currentMonth - 1);
+  
+  const currentMonthTotal = currentMonthData.reduce((sum, item) => sum + item.totalCharge, 0);
+  const previousMonthTotal = previousMonthData.reduce((sum, item) => sum + item.totalCharge, 0);
+  
+  const monthlyGrowth = previousMonthTotal > 0 
+    ? ((currentMonthTotal - previousMonthTotal) / previousMonthTotal) * 100 
+    : 0;
+
+  return {
+    totalFeesPaid: {
+      description: "Sum of all total_charge values from invoice transactions",
+      steps: [
+        {
+          step: "1. Sum all transaction charges",
+          formula: "SUM(total_charge) for all records",
+          value: `${data.length} transactions processed`
+        },
+        {
+          step: "2. Include positive and negative charges",
+          formula: "Positive charges + Negative charges (reversals)",
+          value: `$${totalFeesPaid.toLocaleString()}`
+        }
+      ],
+      dataSource: "invoice_data.total_charge field",
+      totalRecords: data.length
+    },
+    averageRate: {
+      description: "Average rate per transaction across all processed invoices",
+      steps: [
+        {
+          step: "1. Sum all transaction rates",
+          formula: "SUM(rate) for all records",
+          value: `${totalRateSum.toFixed(2)} total rate sum`
+        },
+        {
+          step: "2. Divide by number of transactions",
+          formula: `${totalRateSum.toFixed(2)} ÷ ${data.length}`,
+          value: `$${averageRate.toFixed(2)} per transaction`
+        }
+      ],
+      dataSource: "invoice_data.rate field",
+      totalRecords: data.length
+    },
+    numberOfInvoices: {
+      description: "Total count of processed invoice records in the database",
+      steps: [
+        {
+          step: "1. Count all records",
+          formula: "COUNT(*) FROM invoice_data",
+          value: `${numberOfInvoices} total records`
+        }
+      ],
+      dataSource: "invoice_data table",
+      totalRecords: data.length
+    },
+    negativeRateImpact: {
+      description: "Percentage of transactions with negative rates (reversals/refunds)",
+      steps: [
+        {
+          step: "1. Count negative rate transactions",
+          formula: "COUNT WHERE rate < 0",
+          value: `${negativeRateTransactions.length} negative rate transactions`
+        },
+        {
+          step: "2. Calculate percentage impact",
+          formula: `(${negativeRateTransactions.length} ÷ ${data.length}) × 100`,
+          value: `${negativeRateImpact.toFixed(1)}% of total transactions`
+        },
+        {
+          step: "3. Total negative impact value",
+          formula: "SUM(ABS(total_charge)) for negative rates",
+          value: `$${negativeRateTotal.toLocaleString()} total impact`
+        }
+      ],
+      dataSource: "invoice_data.rate and total_charge fields",
+      totalRecords: data.length
+    },
+    monthlyGrowth: {
+      description: "Month-over-month growth in total charges",
+      steps: [
+        {
+          step: "1. Current month total",
+          formula: `SUM(total_charge) for month ${currentMonth + 1}`,
+          value: `$${currentMonthTotal.toLocaleString()}`
+        },
+        {
+          step: "2. Previous month total", 
+          formula: `SUM(total_charge) for month ${currentMonth}`,
+          value: `$${previousMonthTotal.toLocaleString()}`
+        },
+        {
+          step: "3. Calculate growth percentage",
+          formula: `((${currentMonthTotal} - ${previousMonthTotal}) ÷ ${previousMonthTotal}) × 100`,
+          value: `${monthlyGrowth.toFixed(1)}% growth`
+        }
+      ],
+      dataSource: "invoice_data.total_charge and bill_date fields",
+      totalRecords: data.length
+    }
+  };
+};
+
 export const getMonthlyTrends = (data: InvoiceData[]): ChartDataPoint[] => {
   const monthlyData = data.reduce((acc, item) => {
     const month = new Date(item.billDate).toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
