@@ -71,7 +71,11 @@ export const getTopEventDescriptions = (data: InvoiceData[], limit: number = 10)
 };
 
 export const getCurrencyDistribution = (data: InvoiceData[]): ChartDataPoint[] => {
+  console.log('getCurrencyDistribution - Input data length:', data.length);
+  console.log('getCurrencyDistribution - Sample data:', data.slice(0, 3));
+  
   const currencyData = data.reduce((acc, item) => {
+    console.log('Processing item currency:', item.currency, 'totalCharge:', item.totalCharge);
     if (!acc[item.currency]) {
       acc[item.currency] = 0;
     }
@@ -79,8 +83,13 @@ export const getCurrencyDistribution = (data: InvoiceData[]): ChartDataPoint[] =
     return acc;
   }, {} as Record<string, number>);
 
-  return Object.entries(currencyData)
+  console.log('getCurrencyDistribution - Currency data:', currencyData);
+  
+  const result = Object.entries(currencyData)
     .map(([name, value]) => ({ name, value }));
+    
+  console.log('getCurrencyDistribution - Final result:', result);
+  return result;
 };
 
 export const getSchemeAnalytics = (data: InvoiceData[]): SchemeAnalytics[] => {
