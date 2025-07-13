@@ -14,7 +14,84 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      invoice_data: {
+        Row: {
+          bill_date: string
+          ccy: string
+          charge: number
+          collection_method: string
+          created_at: string
+          docu_type: string
+          event_desc: string
+          event_id: string
+          id: string
+          input_file_date: string
+          input_file_name: string
+          inv_no: string
+          invoice_ica: string
+          qty_amt: number
+          rate: number
+          service_code: string
+          service_code_description: string
+          tax_charge: number
+          total_charge: number
+          total_costs: number
+          uom: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bill_date: string
+          ccy?: string
+          charge?: number
+          collection_method: string
+          created_at?: string
+          docu_type?: string
+          event_desc: string
+          event_id: string
+          id?: string
+          input_file_date: string
+          input_file_name: string
+          inv_no: string
+          invoice_ica: string
+          qty_amt?: number
+          rate?: number
+          service_code: string
+          service_code_description: string
+          tax_charge?: number
+          total_charge?: number
+          total_costs?: number
+          uom: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          bill_date?: string
+          ccy?: string
+          charge?: number
+          collection_method?: string
+          created_at?: string
+          docu_type?: string
+          event_desc?: string
+          event_id?: string
+          id?: string
+          input_file_date?: string
+          input_file_name?: string
+          inv_no?: string
+          invoice_ica?: string
+          qty_amt?: number
+          rate?: number
+          service_code?: string
+          service_code_description?: string
+          tax_charge?: number
+          total_charge?: number
+          total_costs?: number
+          uom?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
