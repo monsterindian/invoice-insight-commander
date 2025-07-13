@@ -1,3 +1,19 @@
+import { ChartContainer } from './ChartContainer';
+
+interface CalculationStep {
+  step: string;
+  formula: string;
+  value: string;
+}
+
+interface ChartCalculation {
+  description: string;
+  steps: CalculationStep[];
+  dataSource: string;
+  totalRecords: number;
+  methodology?: string;
+}
+
 interface HeatmapProps {
   data: Array<{
     region: string;
@@ -6,9 +22,11 @@ interface HeatmapProps {
     riskScore?: number;
   }>;
   height?: number;
+  calculation?: ChartCalculation;
+  title?: string;
 }
 
-export const GeoHeatmap = ({ data, height = 300 }: HeatmapProps) => {
+export const GeoHeatmap = ({ data, height = 300, calculation, title = "Chart" }: HeatmapProps) => {
   const maxValue = Math.max(...data.map(d => d.value));
   
   const getIntensity = (value: number) => {
@@ -22,7 +40,7 @@ export const GeoHeatmap = ({ data, height = 300 }: HeatmapProps) => {
     return 'hsl(var(--success))';
   };
 
-  return (
+  const chartContent = (
     <div className="space-y-4" style={{ height }}>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {data.map((item, index) => (
@@ -53,5 +71,11 @@ export const GeoHeatmap = ({ data, height = 300 }: HeatmapProps) => {
         ))}
       </div>
     </div>
+  );
+
+  return (
+    <ChartContainer calculation={calculation} title={title}>
+      {chartContent}
+    </ChartContainer>
   );
 };

@@ -32,7 +32,8 @@ import {
   getAgentRecommendations,
   getDynamicBenchmarks,
   generateAlertRules,
-  getKPICalculationDetails
+  getKPICalculationDetails,
+  getAllChartCalculations
 } from '@/utils/dataAnalytics';
 import { 
   DollarSign, 
@@ -75,6 +76,7 @@ export const Dashboard = () => {
 
   const kpis = useMemo(() => calculateKPIs(invoiceData), [invoiceData]);
   const kpiDetails = useMemo(() => getKPICalculationDetails(invoiceData), [invoiceData]);
+  const chartCalculations = useMemo(() => getAllChartCalculations(invoiceData), [invoiceData]);
   const monthlyTrends = useMemo(() => getMonthlyTrends(invoiceData), [invoiceData]);
   const topServiceCodes = useMemo(() => getTopServiceCodes(invoiceData), [invoiceData]);
   const topEventDescriptions = useMemo(() => getTopEventDescriptions(invoiceData), [invoiceData]);
@@ -210,6 +212,8 @@ export const Dashboard = () => {
                   <TimeSeriesChart 
                     data={monthlyTrends.map(item => ({ month: item.name, totalCharge: item.value }))} 
                     height={250}
+                    calculation={chartCalculations.monthlyTrends}
+                    title="Monthly Trends"
                   />
                 </CardContent>
               </Card>
@@ -233,7 +237,12 @@ export const Dashboard = () => {
                 </CardHeader>
                 <CardContent>
                   {currencyDistribution.length > 0 ? (
-                    <PieChart data={currencyDistribution} height={250} />
+                    <PieChart 
+                      data={currencyDistribution} 
+                      height={250} 
+                      calculation={chartCalculations.currencyDistribution}
+                      title="Currency Distribution"
+                    />
                   ) : (
                     <div className="flex items-center justify-center h-[250px] text-muted-foreground">
                       <div className="text-center">
@@ -260,6 +269,8 @@ export const Dashboard = () => {
                     data={topServiceCodes.slice(0, 5)} 
                     height={250}
                     color="hsl(var(--chart-2))"
+                    calculation={chartCalculations.topServiceCodes}
+                    title="Top Service Codes"
                   />
                 </CardContent>
               </Card>
@@ -277,6 +288,8 @@ export const Dashboard = () => {
                     data={topEventDescriptions.slice(0, 5)} 
                     height={250}
                     color="hsl(var(--chart-3))"
+                    calculation={chartCalculations.topServiceCodes}
+                    title="Top Event Descriptions"
                   />
                 </CardContent>
               </Card>
@@ -361,7 +374,9 @@ export const Dashboard = () => {
                     value: item.totalFees,
                     riskScore: item.riskScore
                   }))} 
-                  height={400} 
+                  height={400}
+                  calculation={chartCalculations.geoAnalytics}
+                  title="Geographic Analysis"
                 />
               </CardContent>
             </Card>
@@ -402,7 +417,12 @@ export const Dashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <VolumeAnomalyChart data={volumeAnalytics} height={400} />
+                <VolumeAnomalyChart 
+                  data={volumeAnalytics} 
+                  height={400} 
+                  calculation={chartCalculations.volumeAnalytics}
+                  title="Volume Analysis"
+                />
               </CardContent>
             </Card>
           </TabsContent>
@@ -439,6 +459,8 @@ export const Dashboard = () => {
                   })}
                   currencies={currencyDistribution.map(c => c.name)}
                   height={400}
+                  calculation={chartCalculations.currencyVolatility}
+                  title="Currency Volatility"
                 />
               </CardContent>
             </Card>
@@ -456,6 +478,8 @@ export const Dashboard = () => {
                     }))} 
                     height={300}
                     color="hsl(var(--chart-4))"
+                    calculation={chartCalculations.topServiceCodes}
+                    title="Collection Method Performance"
                   />
                 </CardContent>
               </Card>
@@ -472,6 +496,8 @@ export const Dashboard = () => {
                     }))} 
                     height={300}
                     color="hsl(var(--chart-5))"
+                    calculation={chartCalculations.topServiceCodes}
+                    title="UOM Impact Analysis"
                   />
                 </CardContent>
               </Card>
@@ -505,7 +531,12 @@ export const Dashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <LifecycleFunnel data={lifecycleAnalysis} height={400} />
+                <LifecycleFunnel 
+                  data={lifecycleAnalysis} 
+                  height={400} 
+                  calculation={chartCalculations.lifecycleAnalysis}
+                  title="Lifecycle Analysis"
+                />
               </CardContent>
             </Card>
           </TabsContent>
@@ -597,7 +628,12 @@ export const Dashboard = () => {
                   <CardTitle>Service Code Performance</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <BarChart data={topServiceCodes} height={300} />
+                  <BarChart 
+                    data={topServiceCodes} 
+                    height={300} 
+                    calculation={chartCalculations.topServiceCodes}
+                    title="Service Code Performance"
+                  />
                 </CardContent>
               </Card>
 
@@ -611,7 +647,9 @@ export const Dashboard = () => {
                       name: item.schemeId, 
                       value: item.totalFees 
                     }))} 
-                    height={300} 
+                    height={300}
+                    calculation={chartCalculations.topServiceCodes}
+                    title="Scheme Distribution"
                   />
                 </CardContent>
               </Card>
@@ -626,6 +664,8 @@ export const Dashboard = () => {
                   data={negativeRateAnalysis.topNegativeServices} 
                   height={300}
                   color="hsl(var(--destructive))"
+                  calculation={chartCalculations.topServiceCodes}
+                  title="Top Penalty Services"
                 />
               </CardContent>
             </Card>

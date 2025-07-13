@@ -1,4 +1,19 @@
 import { BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { ChartContainer } from './ChartContainer';
+
+interface CalculationStep {
+  step: string;
+  formula: string;
+  value: string;
+}
+
+interface ChartCalculation {
+  description: string;
+  steps: CalculationStep[];
+  dataSource: string;
+  totalRecords: number;
+  methodology?: string;
+}
 
 interface BarChartProps {
   data: Array<{
@@ -8,10 +23,12 @@ interface BarChartProps {
   }>;
   height?: number;
   color?: string;
+  calculation?: ChartCalculation;
+  title?: string;
 }
 
-export const BarChart = ({ data, height = 300, color = 'hsl(var(--chart-1))' }: BarChartProps) => {
-  return (
+export const BarChart = ({ data, height = 300, color = 'hsl(var(--chart-1))', calculation, title = "Chart" }: BarChartProps) => {
+  const chartContent = (
     <ResponsiveContainer width="100%" height={height}>
       <RechartsBarChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 25 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -44,5 +61,11 @@ export const BarChart = ({ data, height = 300, color = 'hsl(var(--chart-1))' }: 
         />
       </RechartsBarChart>
     </ResponsiveContainer>
+  );
+
+  return (
+    <ChartContainer calculation={calculation} title={title}>
+      {chartContent}
+    </ChartContainer>
   );
 };

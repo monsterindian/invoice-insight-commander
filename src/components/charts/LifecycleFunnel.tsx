@@ -1,4 +1,19 @@
 import { FunnelChart, Funnel, Cell, ResponsiveContainer, Tooltip, LabelList } from 'recharts';
+import { ChartContainer } from './ChartContainer';
+
+interface CalculationStep {
+  step: string;
+  formula: string;
+  value: string;
+}
+
+interface ChartCalculation {
+  description: string;
+  steps: CalculationStep[];
+  dataSource: string;
+  totalRecords: number;
+  methodology?: string;
+}
 
 interface LifecycleFunnelProps {
   data: Array<{
@@ -8,6 +23,8 @@ interface LifecycleFunnelProps {
     dropOffRate: number;
   }>;
   height?: number;
+  calculation?: ChartCalculation;
+  title?: string;
 }
 
 const COLORS = [
@@ -18,8 +35,8 @@ const COLORS = [
   'hsl(var(--chart-5))'
 ];
 
-export const LifecycleFunnel = ({ data, height = 400 }: LifecycleFunnelProps) => {
-  return (
+export const LifecycleFunnel = ({ data, height = 400, calculation, title = "Chart" }: LifecycleFunnelProps) => {
+  const chartContent = (
     <div className="space-y-4">
       <ResponsiveContainer width="100%" height={height}>
         <FunnelChart>
@@ -77,5 +94,11 @@ export const LifecycleFunnel = ({ data, height = 400 }: LifecycleFunnelProps) =>
         ))}
       </div>
     </div>
+  );
+
+  return (
+    <ChartContainer calculation={calculation} title={title}>
+      {chartContent}
+    </ChartContainer>
   );
 };

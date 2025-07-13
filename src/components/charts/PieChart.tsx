@@ -1,4 +1,19 @@
 import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { ChartContainer } from './ChartContainer';
+
+interface CalculationStep {
+  step: string;
+  formula: string;
+  value: string;
+}
+
+interface ChartCalculation {
+  description: string;
+  steps: CalculationStep[];
+  dataSource: string;
+  totalRecords: number;
+  methodology?: string;
+}
 
 interface PieChartProps {
   data: Array<{
@@ -7,6 +22,8 @@ interface PieChartProps {
   }>;
   height?: number;
   colors?: string[];
+  calculation?: ChartCalculation;
+  title?: string;
 }
 
 const DEFAULT_COLORS = [
@@ -18,7 +35,7 @@ const DEFAULT_COLORS = [
   'hsl(var(--chart-6))'
 ];
 
-export const PieChart = ({ data, height = 300, colors = DEFAULT_COLORS }: PieChartProps) => {
+export const PieChart = ({ data, height = 300, colors = DEFAULT_COLORS, calculation, title = "Chart" }: PieChartProps) => {
   // Debug: Log the data to see what we're receiving
   console.log('PieChart data:', data);
   
@@ -29,7 +46,8 @@ export const PieChart = ({ data, height = 300, colors = DEFAULT_COLORS }: PieCha
       </div>
     );
   }
-  return (
+
+  const chartContent = (
     <ResponsiveContainer width="100%" height={height}>
       <RechartsPieChart>
         <Pie
@@ -58,5 +76,11 @@ export const PieChart = ({ data, height = 300, colors = DEFAULT_COLORS }: PieCha
         <Legend />
       </RechartsPieChart>
     </ResponsiveContainer>
+  );
+
+  return (
+    <ChartContainer calculation={calculation} title={title}>
+      {chartContent}
+    </ChartContainer>
   );
 };

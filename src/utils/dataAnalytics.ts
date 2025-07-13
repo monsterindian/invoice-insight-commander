@@ -567,3 +567,174 @@ export const generateAlertRules = (data: InvoiceData[]): AlertRule[] => {
     }
   ];
 };
+
+// Get calculation details for all charts
+export const getAllChartCalculations = (invoiceData: InvoiceData[]) => {
+  const baseDetails = {
+    totalRecords: invoiceData.length,
+    dataSource: 'Supabase invoice_data table'
+  };
+  
+  return {
+    monthlyTrends: {
+      description: 'Monthly aggregation of total charges over time to identify seasonal patterns and growth trends',
+      methodology: 'Data is grouped by month from bill_date, summing all total_charge values for trend analysis',
+      steps: [
+        {
+          step: 'Extract billing months',
+          formula: 'GROUP BY DATE_TRUNC(\'month\', bill_date)',
+          value: `${new Set(invoiceData.map(d => d.billDate.substring(0, 7))).size} unique months`
+        },
+        {
+          step: 'Sum total charges per month',
+          formula: 'SUM(total_charge) GROUP BY month',
+          value: `$${invoiceData.reduce((sum, d) => sum + d.totalCharge, 0).toLocaleString()}`
+        },
+        {
+          step: 'Calculate monthly growth',
+          formula: '((current_month - previous_month) / previous_month) * 100',
+          value: 'Trend percentage calculated'
+        }
+      ],
+      ...baseDetails
+    },
+    
+    currencyDistribution: {
+      description: 'Distribution of total charges across different currencies showing exposure and concentration',
+      methodology: 'Groups data by currency code (ccy) and sums absolute values to show true volume distribution',
+      steps: [
+        {
+          step: 'Group by currency',
+          formula: 'GROUP BY ccy',
+          value: `${new Set(invoiceData.map(d => d.currency)).size} currencies found`
+        },
+        {
+          step: 'Sum absolute charges',
+          formula: 'SUM(ABS(total_charge)) per currency',
+          value: 'Prevents negative values from canceling positives'
+        },
+        {
+          step: 'Filter zero values',
+          formula: 'WHERE SUM(ABS(total_charge)) > 0',
+          value: 'Removes currencies with no net activity'
+        }
+      ],
+      ...baseDetails
+    },
+
+    topServiceCodes: {
+      description: 'Top performing service codes by total charge volume for identifying high-impact services',
+      methodology: 'Aggregates charges by service_code and ranks by total volume descending',
+      steps: [
+        {
+          step: 'Group by service code',
+          formula: 'GROUP BY service_code',
+          value: `${new Set(invoiceData.map(d => d.serviceCodeDescription)).size} unique service codes`
+        },
+        {
+          step: 'Sum total charges',
+          formula: 'SUM(total_charge) per service_code',
+          value: 'Includes both positive and negative charges'
+        },
+        {
+          step: 'Rank by volume',
+          formula: 'ORDER BY SUM(total_charge) DESC LIMIT 10',
+          value: 'Top 10 by financial impact'
+        }
+      ],
+      ...baseDetails
+    },
+
+    geoAnalytics: {
+      description: 'Geographic distribution of charges with risk scoring based on negative rate incidents',
+      methodology: 'Maps invoice_ica codes to regions/countries and calculates risk scores from negative rates',
+      steps: [
+        {
+          step: 'Map ICA to regions',
+          formula: 'CASE WHEN invoice_ica IN (...) THEN region',
+          value: 'Geographic classification by payment scheme'
+        },
+        {
+          step: 'Calculate total fees',
+          formula: 'SUM(total_charge) per region',
+          value: 'Aggregate financial exposure by geography'
+        },
+        {
+          step: 'Calculate risk score',
+          formula: 'COUNT(rate < 0) / COUNT(*) per region',
+          value: 'Percentage of negative rate incidents'
+        }
+      ],
+      ...baseDetails
+    },
+
+    volumeAnalytics: {
+      description: 'Monthly volume analysis with anomaly detection based on statistical variance',
+      methodology: 'Calculates monthly volumes and identifies anomalies using standard deviation thresholds',
+      steps: [
+        {
+          step: 'Monthly volume calculation',
+          formula: 'COUNT(*) GROUP BY month, input_file_name',
+          value: 'Files and invoices counted per month'
+        },
+        {
+          step: 'Calculate average volume',
+          formula: 'AVG(monthly_count) across all months',
+          value: 'Baseline for anomaly detection'
+        },
+        {
+          step: 'Anomaly detection',
+          formula: 'ABS(monthly_count - avg) > (1.5 * STDDEV)',
+          value: 'Flags volumes beyond 1.5 standard deviations'
+        }
+      ],
+      ...baseDetails
+    },
+
+    currencyVolatility: {
+      description: 'Monthly currency charge volatility to identify stability and risk patterns',
+      methodology: 'Tracks monthly charge amounts per currency to identify volatility and stability patterns',
+      steps: [
+        {
+          step: 'Monthly currency charges',
+          formula: 'SUM(total_charge) GROUP BY month, ccy',
+          value: 'Charge totals per currency per month'
+        },
+        {
+          step: 'Calculate variance',
+          formula: 'VARIANCE(monthly_charges) per currency',
+          value: 'Measures charge stability over time'
+        },
+        {
+          step: 'Identify patterns',
+          formula: 'Compare monthly values for trends',
+          value: 'Detects increasing/decreasing patterns'
+        }
+      ],
+      ...baseDetails
+    },
+
+    lifecycleAnalysis: {
+      description: 'Invoice processing lifecycle analysis showing stage progression and drop-off rates',
+      methodology: 'Categorizes invoices by processing stage and calculates conversion rates between stages',
+      steps: [
+        {
+          step: 'Categorize by stage',
+          formula: 'CASE based on docu_type and processing indicators',
+          value: 'Groups invoices into lifecycle stages'
+        },
+        {
+          step: 'Calculate stage counts',
+          formula: 'COUNT(*) per stage',
+          value: 'Volume at each processing stage'
+        },
+        {
+          step: 'Calculate drop-off rates',
+          formula: '((prev_stage - current_stage) / prev_stage) * 100',
+          value: 'Conversion loss between stages'
+        }
+      ],
+      ...baseDetails
+    }
+  };
+};

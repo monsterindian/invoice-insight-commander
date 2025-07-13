@@ -1,4 +1,19 @@
 import { ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { ChartContainer } from './ChartContainer';
+
+interface CalculationStep {
+  step: string;
+  formula: string;
+  value: string;
+}
+
+interface ChartCalculation {
+  description: string;
+  steps: CalculationStep[];
+  dataSource: string;
+  totalRecords: number;
+  methodology?: string;
+}
 
 interface VolumeAnomalyChartProps {
   data: Array<{
@@ -9,10 +24,12 @@ interface VolumeAnomalyChartProps {
     anomalyScore: number;
   }>;
   height?: number;
+  calculation?: ChartCalculation;
+  title?: string;
 }
 
-export const VolumeAnomalyChart = ({ data, height = 300 }: VolumeAnomalyChartProps) => {
-  return (
+export const VolumeAnomalyChart = ({ data, height = 300, calculation, title = "Chart" }: VolumeAnomalyChartProps) => {
+  const chartContent = (
     <ResponsiveContainer width="100%" height={height}>
       <ComposedChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -87,5 +104,11 @@ export const VolumeAnomalyChart = ({ data, height = 300 }: VolumeAnomalyChartPro
         />
       </ComposedChart>
     </ResponsiveContainer>
+  );
+
+  return (
+    <ChartContainer calculation={calculation} title={title}>
+      {chartContent}
+    </ChartContainer>
   );
 };

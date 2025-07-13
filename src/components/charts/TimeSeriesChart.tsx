@@ -1,4 +1,19 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { ChartContainer } from './ChartContainer';
+
+interface CalculationStep {
+  step: string;
+  formula: string;
+  value: string;
+}
+
+interface ChartCalculation {
+  description: string;
+  steps: CalculationStep[];
+  dataSource: string;
+  totalRecords: number;
+  methodology?: string;
+}
 
 interface TimeSeriesChartProps {
   data: Array<{
@@ -12,16 +27,18 @@ interface TimeSeriesChartProps {
     color: string;
     name: string;
   }>;
+  calculation?: ChartCalculation;
+  title?: string;
 }
 
-export const TimeSeriesChart = ({ data, height = 300, lines }: TimeSeriesChartProps) => {
+export const TimeSeriesChart = ({ data, height = 300, lines, calculation, title = "Chart" }: TimeSeriesChartProps) => {
   const defaultLines = [
     { dataKey: 'totalCharge', color: 'hsl(var(--chart-1))', name: 'Total Charges' }
   ];
 
   const chartLines = lines || defaultLines;
 
-  return (
+  const chartContent = (
     <ResponsiveContainer width="100%" height={height}>
       <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -62,5 +79,11 @@ export const TimeSeriesChart = ({ data, height = 300, lines }: TimeSeriesChartPr
         ))}
       </LineChart>
     </ResponsiveContainer>
+  );
+
+  return (
+    <ChartContainer calculation={calculation} title={title}>
+      {chartContent}
+    </ChartContainer>
   );
 };
