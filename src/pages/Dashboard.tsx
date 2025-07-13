@@ -11,6 +11,7 @@ import { CurrencyVolatilityChart } from '@/components/charts/CurrencyVolatilityC
 import { LifecycleFunnel } from '@/components/charts/LifecycleFunnel';
 import { AlertDashboard } from '@/components/charts/AlertDashboard';
 import { AgenticAIRecommendations } from '@/components/AgenticAIRecommendations';
+import { InvoiceDataTable } from '@/components/InvoiceDataTable';
 import { sampleInvoiceData } from '@/data/sampleInvoiceData';
 import { 
   calculateKPIs, 
@@ -558,6 +559,11 @@ export const Dashboard = () => {
             </Card>
           </TabsContent>
         </Tabs>
+        
+        {/* Data Table Section */}
+        <div className="space-y-6">
+          <InvoiceDataTable />
+        </div>
       </div>
     </div>
   );
