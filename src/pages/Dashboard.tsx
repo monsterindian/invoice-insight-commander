@@ -12,6 +12,7 @@ import { LifecycleFunnel } from '@/components/charts/LifecycleFunnel';
 import { AlertDashboard } from '@/components/charts/AlertDashboard';
 import { AgenticAIRecommendations } from '@/components/AgenticAIRecommendations';
 import { InvoiceDataTable } from '@/components/InvoiceDataTable';
+import { DataSourceIndicator } from '@/components/DataSourceIndicator';
 import { fetchInvoiceData } from '@/services/invoiceDataService';
 import { InvoiceData } from '@/types/invoice';
 import { 
@@ -185,10 +186,19 @@ export const Dashboard = () => {
               {/* Monthly Trends */}
               <Card className="bg-gradient-card shadow-card">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Activity className="h-5 w-5 text-primary" />
-                    Total Fees Over Time
-                  </CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2">
+                      <Activity className="h-5 w-5 text-primary" />
+                      Total Fees Over Time
+                    </CardTitle>
+                    <DataSourceIndicator
+                      title="Monthly Trends"
+                      fields={[
+                        { field: 'bill_date', description: 'Invoice billing date', source: 'database' },
+                        { field: 'total_charge', description: 'Sum of all charges per month', source: 'calculated' }
+                      ]}
+                    />
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <TimeSeriesChart 
@@ -201,10 +211,19 @@ export const Dashboard = () => {
               {/* Currency Distribution */}
               <Card className="bg-gradient-card shadow-card">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <PieChartIcon className="h-5 w-5 text-primary" />
-                    Currency Distribution
-                  </CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2">
+                      <PieChartIcon className="h-5 w-5 text-primary" />
+                      Currency Distribution
+                    </CardTitle>
+                    <DataSourceIndicator
+                      title="Currency Analysis"
+                      fields={[
+                        { field: 'ccy', description: 'Transaction currency code', source: 'database' },
+                        { field: 'total_charge', description: 'Charge amounts by currency', source: 'database' }
+                      ]}
+                    />
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <PieChart data={currencyDistribution} height={250} />
@@ -303,10 +322,21 @@ export const Dashboard = () => {
 
             <Card className="bg-gradient-card shadow-card">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Globe className="h-5 w-5 text-primary" />
-                  Regional Fee Heatmap & Risk Analysis
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Globe className="h-5 w-5 text-primary" />
+                    Regional Fee Heatmap & Risk Analysis
+                  </CardTitle>
+                  <DataSourceIndicator
+                    title="Geographic Analysis"
+                    fields={[
+                      { field: 'invoice_ica', description: 'Payment scheme identifier', source: 'database' },
+                      { field: 'region', description: 'Derived from ICA codes', source: 'derived' },
+                      { field: 'country', description: 'Derived from ICA codes', source: 'derived' },
+                      { field: 'rate', description: 'Negative rates indicate risk', source: 'database' }
+                    ]}
+                  />
+                </div>
               </CardHeader>
               <CardContent>
                 <GeoHeatmap 
