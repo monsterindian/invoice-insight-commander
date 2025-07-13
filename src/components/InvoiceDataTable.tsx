@@ -4,16 +4,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { sampleInvoiceData } from "@/data/sampleInvoiceData";
+import { InvoiceData } from "@/types/invoice";
 
 const ITEMS_PER_PAGE = 20;
 
-export const InvoiceDataTable = () => {
+interface InvoiceDataTableProps {
+  data: InvoiceData[];
+}
+
+export const InvoiceDataTable = ({ data }: InvoiceDataTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
 
   // Filter data based on search term
-  const filteredData = sampleInvoiceData.filter((item) =>
+  const filteredData = data.filter((item) =>
     Object.values(item).some((value) =>
       value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
     )

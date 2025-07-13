@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { KPICard } from '@/components/KPICard';
@@ -12,7 +12,8 @@ import { LifecycleFunnel } from '@/components/charts/LifecycleFunnel';
 import { AlertDashboard } from '@/components/charts/AlertDashboard';
 import { AgenticAIRecommendations } from '@/components/AgenticAIRecommendations';
 import { InvoiceDataTable } from '@/components/InvoiceDataTable';
-import { sampleInvoiceData } from '@/data/sampleInvoiceData';
+import { fetchInvoiceData } from '@/services/invoiceDataService';
+import { InvoiceData } from '@/types/invoice';
 import { 
   calculateKPIs, 
   getMonthlyTrends, 
@@ -48,24 +49,84 @@ import {
 } from 'lucide-react';
 
 export const Dashboard = () => {
-  const kpis = useMemo(() => calculateKPIs(sampleInvoiceData), []);
-  const monthlyTrends = useMemo(() => getMonthlyTrends(sampleInvoiceData), []);
-  const topServiceCodes = useMemo(() => getTopServiceCodes(sampleInvoiceData), []);
-  const topEventDescriptions = useMemo(() => getTopEventDescriptions(sampleInvoiceData), []);
-  const currencyDistribution = useMemo(() => getCurrencyDistribution(sampleInvoiceData), []);
-  const schemeAnalytics = useMemo(() => getSchemeAnalytics(sampleInvoiceData), []);
-  const negativeRateAnalysis = useMemo(() => getNegativeRateAnalysis(sampleInvoiceData), []);
+  const [invoiceData, setInvoiceData] = useState<InvoiceData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchInvoiceData();
+        setInvoiceData(data);
+        setError(null);
+      } catch (err) {
+        setError('Failed to load invoice data');
+        console.error('Error loading invoice data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  const kpis = useMemo(() => calculateKPIs(invoiceData), [invoiceData]);
+  const monthlyTrends = useMemo(() => getMonthlyTrends(invoiceData), [invoiceData]);
+  const topServiceCodes = useMemo(() => getTopServiceCodes(invoiceData), [invoiceData]);
+  const topEventDescriptions = useMemo(() => getTopEventDescriptions(invoiceData), [invoiceData]);
+  const currencyDistribution = useMemo(() => getCurrencyDistribution(invoiceData), [invoiceData]);
+  const schemeAnalytics = useMemo(() => getSchemeAnalytics(invoiceData), [invoiceData]);
+  const negativeRateAnalysis = useMemo(() => getNegativeRateAnalysis(invoiceData), [invoiceData]);
   
   // New analytics
-  const geoAnalytics = useMemo(() => getGeoAnalytics(sampleInvoiceData), []);
-  const volumeAnalytics = useMemo(() => getVolumeAnalytics(sampleInvoiceData), []);
-  const currencyVolatility = useMemo(() => getCurrencyVolatility(sampleInvoiceData), []);
-  const collectionMethodAnalysis = useMemo(() => getCollectionMethodAnalysis(sampleInvoiceData), []);
-  const uomAnalysis = useMemo(() => getUOMAnalysis(sampleInvoiceData), []);
-  const lifecycleAnalysis = useMemo(() => getLifecycleAnalysis(sampleInvoiceData), []);
-  const agentRecommendations = useMemo(() => getAgentRecommendations(sampleInvoiceData), []);
-  const dynamicBenchmarks = useMemo(() => getDynamicBenchmarks(sampleInvoiceData), []);
-  const alertRules = useMemo(() => generateAlertRules(sampleInvoiceData), []);
+  const geoAnalytics = useMemo(() => getGeoAnalytics(invoiceData), [invoiceData]);
+  const volumeAnalytics = useMemo(() => getVolumeAnalytics(invoiceData), [invoiceData]);
+  const currencyVolatility = useMemo(() => getCurrencyVolatility(invoiceData), [invoiceData]);
+  const collectionMethodAnalysis = useMemo(() => getCollectionMethodAnalysis(invoiceData), [invoiceData]);
+  const uomAnalysis = useMemo(() => getUOMAnalysis(invoiceData), [invoiceData]);
+  const lifecycleAnalysis = useMemo(() => getLifecycleAnalysis(invoiceData), [invoiceData]);
+  const agentRecommendations = useMemo(() => getAgentRecommendations(invoiceData), [invoiceData]);
+  const dynamicBenchmarks = useMemo(() => getDynamicBenchmarks(invoiceData), [invoiceData]);
+  const alertRules = useMemo(() => generateAlertRules(invoiceData), [invoiceData]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background p-6 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading dashboard data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background p-6 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-destructive text-lg mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (invoiceData.length === 0) {
+    return (
+      <div className="min-h-screen bg-background p-6 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-muted-foreground text-lg mb-4">No invoice data found</p>
+          <p className="text-sm text-muted-foreground">Please add data to the invoice_data table in Supabase</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -562,7 +623,17 @@ export const Dashboard = () => {
         
         {/* Data Table Section */}
         <div className="space-y-6">
-          <InvoiceDataTable />
+          <Card className="bg-gradient-card shadow-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-primary" />
+                Complete Invoice Data ({invoiceData.length} records)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <InvoiceDataTable data={invoiceData} />
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

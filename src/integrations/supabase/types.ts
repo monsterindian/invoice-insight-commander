@@ -24,7 +24,6 @@ export type Database = {
           docu_type: string
           event_desc: string
           event_id: string
-          id: string
           input_file_date: string
           input_file_name: string
           inv_no: string
@@ -38,7 +37,6 @@ export type Database = {
           total_costs: number
           uom: string
           updated_at: string
-          user_id: string
         }
         Insert: {
           bill_date: string
@@ -49,7 +47,6 @@ export type Database = {
           docu_type?: string
           event_desc: string
           event_id: string
-          id?: string
           input_file_date: string
           input_file_name: string
           inv_no: string
@@ -63,7 +60,6 @@ export type Database = {
           total_costs?: number
           uom: string
           updated_at?: string
-          user_id: string
         }
         Update: {
           bill_date?: string
@@ -74,7 +70,6 @@ export type Database = {
           docu_type?: string
           event_desc?: string
           event_id?: string
-          id?: string
           input_file_date?: string
           input_file_name?: string
           inv_no?: string
@@ -88,7 +83,6 @@ export type Database = {
           total_costs?: number
           uom?: string
           updated_at?: string
-          user_id?: string
         }
         Relationships: []
       }
