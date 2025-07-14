@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { BarChart3, TrendingUp, DollarSign, Activity } from 'lucide-react';
+import { BarChart3, TrendingUp, DollarSign, Activity, Bot } from 'lucide-react';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -60,13 +60,22 @@ const Index = () => {
           </Card>
         </div>
 
-        <div className="text-center">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <Button 
             size="lg" 
             onClick={() => navigate('/ml-analytics')}
             className="bg-gradient-primary hover:shadow-glow transition-all duration-300 text-lg px-8 py-6"
           >
             View Analytics Dashboard
+          </Button>
+          <Button 
+            size="lg" 
+            variant="outline"
+            onClick={() => navigate('/agent-management')}
+            className="text-lg px-8 py-6 border-primary/20 hover:bg-primary/5"
+          >
+            <Bot className="mr-2 h-5 w-5" />
+            Manage AI Agents
           </Button>
         </div>
       </div>
